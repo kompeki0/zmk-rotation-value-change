@@ -8,14 +8,10 @@ properties:
     required: true
     const: 0
 
-  binding:
-    type: phandle
-    required: true
-    description: "Sensor device this controller is attached to (e.g., an EC11 encoder node)."
-
   index:
     type: int
     required: true
+    description: "Value store index to modify"
 
   min:
     type: int
@@ -36,3 +32,8 @@ properties:
     type: int
     required: false
     default: 1
+
+  bindings:
+    type: phandle-array
+    required: true
+    description: "Dummy binding list (required by keymap sensor controller). Use <&none>."
