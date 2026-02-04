@@ -1,0 +1,6 @@
+config ZMK_VALUE_STORE_SIZE
+    int "Value store size"
+    default 8
+    range 1 64
+    help
+      Number of integer slots available for behaviors that store adjustable values.

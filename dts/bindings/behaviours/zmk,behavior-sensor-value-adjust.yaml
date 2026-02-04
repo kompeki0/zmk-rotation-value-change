@@ -1,0 +1,36 @@
+description: Sensor behavior to adjust an integer value by rotary detents
+
+compatible: "zmk,behavior-sensor-value-adjust"
+
+properties:
+  "#sensor-binding-cells":
+    type: int
+    required: true
+    const: 0
+
+  index:
+    type: int
+    required: true
+    description: "Value store index to modify (0..CONFIG_ZMK_VALUE_STORE_SIZE-1)."
+
+  min:
+    type: int
+    required: false
+    default: 0
+
+  max:
+    type: int
+    required: false
+    default: 100
+
+  step:
+    type: int
+    required: false
+    default: 1
+    description: "Amount added/subtracted per logical step."
+
+  ticks-per-step:
+    type: int
+    required: false
+    default: 1
+    description: "Number of encoder trigger events required to apply one step change."
