@@ -2,12 +2,9 @@ description: Mouse move behavior that derives speed dynamically from a shared va
 
 compatible: "zmk,behavior-mouse-move-dynamic"
 
-properties:
-  "#binding-cells":
-    type: int
-    required: true
-    const: 1
+include: one_param.yaml
 
+properties:
   binding:
     type: phandle
     required: true
@@ -17,7 +14,6 @@ properties:
     type: int
     required: false
     default: 0
-    description: Value-store index to read speed from
 
   value-min:
     type: int
