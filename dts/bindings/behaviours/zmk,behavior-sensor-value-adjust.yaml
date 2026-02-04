@@ -8,10 +8,14 @@ properties:
     required: true
     const: 0
 
+  bindings:
+    type: phandle-array
+    required: true
+    description: "One binding entry (unused). Use any valid behavior binding like &none."
+
   index:
     type: int
     required: true
-    description: "Value store index to modify (0..CONFIG_ZMK_VALUE_STORE_SIZE-1)."
 
   min:
     type: int
@@ -27,10 +31,8 @@ properties:
     type: int
     required: false
     default: 1
-    description: "Amount added/subtracted per logical step."
 
   ticks-per-step:
     type: int
     required: false
     default: 1
-    description: "Number of encoder trigger events required to apply one step change."
