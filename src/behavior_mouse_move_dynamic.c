@@ -119,7 +119,7 @@ static void poll_tick(struct k_work *work) {
 
     const struct behavior_mouse_move_dynamic_config *cfg = g_dev->config;
 
-    int32_t val = zmk_rotation_value_get(data->st.value_index);
+    int32_t val = zmk_value_store_get(data->st.value_index, cfg->value_min);
     int32_t vel = value_to_velocity(cfg, val);
     uint32_t next_param = build_param_from_dir_and_vel(data->st.dir_param, vel);
 
@@ -162,7 +162,7 @@ static int on_pressed(struct zmk_behavior_binding *binding,
     data->st.dir_param = binding->param1;
     data->st.value_index = (uint8_t)binding->param2;
 
-    int32_t val = zmk_rotation_value_get(data->st.value_index);
+    int32_t val = zmk_value_store_get(data->st.value_index, cfg->value_min);
     int32_t vel = value_to_velocity(cfg, val);
     uint32_t param = build_param_from_dir_and_vel(data->st.dir_param, vel);
 
