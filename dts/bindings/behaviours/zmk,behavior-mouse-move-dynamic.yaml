@@ -2,8 +2,6 @@ description: Mouse move behavior that derives speed dynamically from a shared va
 
 compatible: "zmk,behavior-mouse-move-dynamic"
 
-include: base.yaml
-
 properties:
   "#binding-cells":
     type: int
