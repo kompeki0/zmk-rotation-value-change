@@ -42,12 +42,14 @@ properties:
     default: 40
 
   normalize-diagonal:
-    type: boolean
+    type: int
     required: false
-    default: true
+    default: 1
+    description: "1=enable diagonal normalization, 0=disable"
 
   diag-scale-permil:
     type: int
     required: false
     default: 707
-    description: "Scale applied to X/Y when moving diagonally. 707 ~= 1/sqrt(2) * 1000"
+    description: "Scale applied to X/Y when moving diagonally. 707 ~= 1/sqrt(2)*1000"
+
