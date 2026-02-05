@@ -13,7 +13,7 @@
 #include <zmk/behavior.h>
 #include <dt-bindings/zmk/pointing.h>
 
-#include <zmk/zmk_value_store.h>
+#include <zmk_value_store.h>
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
