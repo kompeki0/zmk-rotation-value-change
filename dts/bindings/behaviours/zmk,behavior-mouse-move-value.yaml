@@ -2,12 +2,10 @@ description: Mouse move behavior with dynamic speed from value_store
 
 compatible: "zmk,behavior-mouse-move-value"
 
-properties:
-  "#binding-cells":
-    type: int
-    required: true
-    const: 1
 
+include: one_param.yaml
+
+properties:
   index:
     type: int
     required: false
