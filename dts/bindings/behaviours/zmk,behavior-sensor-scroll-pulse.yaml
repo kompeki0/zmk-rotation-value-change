@@ -1,0 +1,50 @@
+description: Sensor scroll pulse behavior (encoder tick -> short hold scroll)
+
+compatible: "zmk,behavior-sensor-scroll-pulse"
+
+properties:
+  "#sensor-binding-cells":
+    type: int
+    required: true
+    const: 0
+
+  bindings:
+    type: phandle-array
+    required: true
+    description: "Dummy binding list. Use <&none>."
+
+  binding:
+    type: phandle
+    required: true
+    description: Target behavior device (must be zmk,behavior-input-two-axis configured for wheel)
+
+  pulse-ms:
+    type: int
+    required: false
+    default: 30
+
+  fast-dt-ms:
+    type: int
+    required: false
+    default: 60
+
+  slow-dt-ms:
+    type: int
+    required: false
+    default: 250
+
+  min-speed:
+    type: int
+    required: false
+    default: 3
+
+  max-speed:
+    type: int
+    required: false
+    default: 18
+
+  axis:
+    type: int
+    required: false
+    default: 0
+    description: 0=wheel(vertical), 1=hwheel(horizontal)
