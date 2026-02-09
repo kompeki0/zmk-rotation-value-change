@@ -32,9 +32,9 @@ properties:
     default: 1
 
   oneshot-on-press:
-    type: boolean
+    type: int
     required: false
-    default: true
+    default: 1
     description: "Emit one relative report immediately on press."
 
   oneshot-scale:
