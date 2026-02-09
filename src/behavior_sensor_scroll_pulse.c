@@ -241,7 +241,7 @@ static int init(const struct device *dev) {
 #define INST(n)                                                                                     \
     static struct behavior_sensor_scroll_pulse_data data_##n = {};                                  \
     static const struct behavior_sensor_scroll_pulse_config cfg_##n = {                             \
-        .target_behavior = DT_LABEL(DT_INST_PHANDLE(n, binding)),                         \
+        .target_behavior = DEVICE_DT_NAME(DT_INST_PHANDLE(n, binding)),                             \
         .pulse_ms   = DT_INST_PROP_OR(n, pulse_ms, 30),                                             \
         .fast_dt_ms = DT_INST_PROP_OR(n, fast_dt_ms, 60),                                           \
         .slow_dt_ms = DT_INST_PROP_OR(n, slow_dt_ms, 250),                                          \
