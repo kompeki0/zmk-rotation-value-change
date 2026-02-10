@@ -48,6 +48,7 @@ struct behavior_sensor_rotate_accel_config {
     bool same_dir_only;
 
     uint16_t tap_ms;
+    uint8_t dt_calc_steps;
 };
 
 struct behavior_sensor_rotate_accel_data {
@@ -55,6 +56,8 @@ struct behavior_sensor_rotate_accel_data {
 
     uint32_t last_ms[ZMK_KEYMAP_SENSORS_LEN][ZMK_KEYMAP_LAYERS_LEN];
     enum accel_dir last_dir[ZMK_KEYMAP_SENSORS_LEN][ZMK_KEYMAP_LAYERS_LEN];
+    uint8_t step_count[ZMK_KEYMAP_SENSORS_LEN][ZMK_KEYMAP_LAYERS_LEN];
+    uint8_t cached_steps[ZMK_KEYMAP_SENSORS_LEN][ZMK_KEYMAP_LAYERS_LEN];
 };
 
 static inline int enqueue_press(struct zmk_behavior_binding_event *event,
@@ -213,21 +216,46 @@ static int process(struct zmk_behavior_binding *binding, struct zmk_behavior_bin
     event.source = ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL;
 #endif
 
-    uint32_t now = (uint32_t)k_uptime_get();
-    uint32_t last = data->last_ms[sensor_index][event.layer];
-    enum accel_dir last_dir = data->last_dir[sensor_index][event.layer];
+    uint8_t calc_n = cfg->dt_calc_steps ? cfg->dt_calc_steps : 1;
 
-    uint32_t dt = (last == 0) ? (uint32_t)cfg->dt_max_ms : (now - last);
+    // 何ステップごとにdt更新するかのカウンタ
+    uint8_t *cnt = &data->step_count[sensor_index][event.layer];
+    uint8_t *cached = &data->cached_steps[sensor_index][event.layer];
 
-    if (cfg->same_dir_only && last != 0 && last_dir != ACCEL_DIR_NONE && last_dir != dir) {
-        // 逆回転で加速リセット（遅い扱い）
-        dt = cfg->dt_max_ms;
+    (*cnt)++;
+
+    uint8_t steps;
+
+    if (*cached == 0) {
+        // 初回は最低でも1を入れておく（未初期化対策）
+        *cached = cfg->steps_min ? cfg->steps_min : 1;
     }
 
-    data->last_ms[sensor_index][event.layer] = now;
-    data->last_dir[sensor_index][event.layer] = dir;
+    if (*cnt >= calc_n) {
+        *cnt = 0;
 
-    uint8_t steps = calc_steps(cfg, dt);
+        uint32_t now = (uint32_t)k_uptime_get();
+        uint32_t last = data->last_ms[sensor_index][event.layer];
+        enum accel_dir last_dir = data->last_dir[sensor_index][event.layer];
+
+        uint32_t dt = (last == 0) ? (uint32_t)cfg->dt_max_ms : (now - last);
+
+        if (cfg->same_dir_only && last != 0 && last_dir != ACCEL_DIR_NONE && last_dir != dir) {
+            dt = cfg->dt_max_ms;
+        }
+
+        data->last_ms[sensor_index][event.layer] = now;
+        data->last_dir[sensor_index][event.layer] = dir;
+
+        steps = calc_steps(cfg, dt);
+        *cached = steps;
+
+        LOG_DBG("accel update pos=%d layer=%d dir=%d dt=%u steps=%u (every %u)",
+                event.position, event.layer, dir, dt, steps, calc_n);
+    } else {
+        // 更新しないステップは前回値を使う
+        steps = *cached;
+    }
 
     struct zmk_behavior_binding base =
         (dir == ACCEL_DIR_CW) ? cfg->cw_binding : cfg->ccw_binding;
@@ -267,7 +295,8 @@ static const struct behavior_driver_api api = {
         .steps_max       = DT_INST_PROP_OR(n, steps_max, 5),                                       \
         .curve           = DT_INST_PROP_OR(n, curve, 1),                                           \
         .same_dir_only   = DT_INST_PROP_OR(n, same_dir_only, 0),                                   \
-        .tap_ms          = DT_INST_PROP_OR(n, tap_ms, 0),                                          \
+        .tap_ms          = DT_INST_PROP_OR(n, tap_ms, 0),                                           \
+        .dt_calc_steps  = DT_INST_PROP_OR(n, dt_calc_steps, 1),                                          \
     };                                                                                             \
     static struct behavior_sensor_rotate_accel_data data_##n = {};                                 \
     BEHAVIOR_DT_INST_DEFINE(                                                                       \

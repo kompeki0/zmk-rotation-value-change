@@ -42,3 +42,8 @@ properties:
     type: int
     default: 0
     description: "Delay between press and release enqueued for the binding"
+
+  dt-calc-steps:
+    type: int
+    default: 1
+    description: "Recompute dt/accel every N sensor triggers (e.g. 5)."
