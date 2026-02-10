@@ -262,9 +262,6 @@ static int process(struct zmk_behavior_binding *binding, struct zmk_behavior_bin
 
     struct zmk_behavior_binding scaled = scale_move_binding(base, steps);
 
-    LOG_DBG("accel rotate pos=%d layer=%d dir=%d dt=%u steps=%u",
-            event.position, event.layer, dir, dt, steps);
-
     enqueue_press(&event, scaled, cfg->tap_ms);
     enqueue_release(&event, scaled);
 
