@@ -25,6 +25,6 @@ properties:
     description: Binding list aligned by index with case-values
 
   default-binding:
-    type: phandle-array
-    required: false
+    type: phandle
+    required: true
     description: Optional binding used when no case value matches
