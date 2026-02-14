@@ -25,20 +25,14 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-struct behavior_value_switch_case {
-    int32_t case_value;
-    struct zmk_behavior_binding binding;
-};
-
 struct behavior_value_switch_config {
     uint8_t index;
     int32_t fallback;
 
     uint16_t case_count;
-    const struct behavior_value_switch_case *cases;
-
-    bool has_default_binding;
-    struct zmk_behavior_binding default_binding;
+    const int32_t *case_values;
+    uint16_t binding_count;
+    const struct zmk_behavior_binding *bindings;
 };
 
 struct behavior_value_switch_data {
@@ -53,13 +47,13 @@ static bool binding_is_valid(struct zmk_behavior_binding binding) {
 static struct zmk_behavior_binding resolve_binding(const struct behavior_value_switch_config *cfg,
                                                    int32_t value) {
     for (int i = 0; i < cfg->case_count; i++) {
-        if (cfg->cases[i].case_value == value) {
-            return cfg->cases[i].binding;
+        if (cfg->case_values[i] == value) {
+            return cfg->bindings[i];
         }
     }
 
-    if (cfg->has_default_binding) {
-        return cfg->default_binding;
+    if (cfg->binding_count > cfg->case_count) {
+        return cfg->bindings[cfg->case_count];
     }
 
     struct zmk_behavior_binding none = {0};
@@ -134,35 +128,24 @@ static const struct behavior_driver_api api = {
     }
 
 #define _CASE_ENTRY(idx, inst)                                                                        \
-    {                                                                                                 \
-        .case_value = DT_INST_PROP_BY_IDX(inst, case_values, idx),                                   \
-        .binding = _BINDING_ENTRY(idx, inst),                                                         \
-    }
-
-#define _DEFAULT_BINDING(inst)                                                                        \
-    {                                                                                                 \
-        .behavior_dev = DEVICE_DT_NAME(DT_INST_PHANDLE_BY_IDX(inst, default_binding, 0)),            \
-        .param1 = COND_CODE_0(DT_INST_PHA_HAS_CELL_AT_IDX(inst, default_binding, 0, param1), (0),    \
-                              (DT_INST_PHA_BY_IDX(inst, default_binding, 0, param1))),               \
-        .param2 = COND_CODE_0(DT_INST_PHA_HAS_CELL_AT_IDX(inst, default_binding, 0, param2), (0),    \
-                              (DT_INST_PHA_BY_IDX(inst, default_binding, 0, param2))),               \
-    }
+    DT_INST_PROP_BY_IDX(inst, case_values, idx)
 
 #define INST(n)                                                                                        \
-    BUILD_ASSERT(DT_INST_PROP_LEN(n, case_values) == DT_INST_PROP_LEN(n, bindings),                  \
-                 "case-values and bindings must have the same length");                               \
-    static const struct behavior_value_switch_case cases_##n[] = {                                    \
+    BUILD_ASSERT((DT_INST_PROP_LEN(n, bindings) == DT_INST_PROP_LEN(n, case_values)) ||              \
+                     (DT_INST_PROP_LEN(n, bindings) == (DT_INST_PROP_LEN(n, case_values) + 1)),      \
+                 "bindings length must be case-values length or case-values length + 1 (default)");  \
+    static const int32_t case_values_##n[] = {                                                        \
         LISTIFY(DT_INST_PROP_LEN(n, case_values), _CASE_ENTRY, (,), n)};                             \
+    static const struct zmk_behavior_binding bindings_##n[] = {                                       \
+        LISTIFY(DT_INST_PROP_LEN(n, bindings), _BINDING_ENTRY, (,), n)};                             \
     static struct behavior_value_switch_data data_##n = {0};                                          \
     static const struct behavior_value_switch_config cfg_##n = {                                      \
         .index = (uint8_t)DT_INST_PROP(n, index),                                                     \
         .fallback = DT_INST_PROP_OR(n, fallback, 0),                                                  \
         .case_count = DT_INST_PROP_LEN(n, case_values),                                               \
-        .cases = cases_##n,                                                                           \
-        .has_default_binding = DT_INST_NODE_HAS_PROP(n, default_binding),                            \
-        .default_binding = COND_CODE_1(DT_INST_NODE_HAS_PROP(n, default_binding),                    \
-                                       (_DEFAULT_BINDING(n)),                                         \
-                                       ({0})),                                                        \
+        .case_values = case_values_##n,                                                               \
+        .binding_count = DT_INST_PROP_LEN(n, bindings),                                               \
+        .bindings = bindings_##n,                                                                     \
     };                                                                                               \
     BEHAVIOR_DT_INST_DEFINE(n, NULL, NULL, &data_##n, &cfg_##n,                                       \
                             POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT, &api);

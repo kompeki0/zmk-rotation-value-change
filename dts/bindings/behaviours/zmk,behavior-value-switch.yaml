@@ -22,9 +22,9 @@ properties:
   bindings:
     type: phandle-array
     required: true
-    description: Binding list aligned by index with case-values
-
-  default-binding:
-    type: phandle
-    required: true
-    description: Optional binding used when no case value matches
+    description: |
+      Binding list aligned by index with case-values.
+      You can optionally append one extra binding as default.
+      So the allowed lengths are:
+      - len(bindings) == len(case-values)
+      - len(bindings) == len(case-values) + 1 (last entry is default)
